@@ -2,137 +2,164 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\Rules\Exists;
 
 class maincontroller extends Controller
 {
-  public function __construct()
-  {
-        $this->name = request()->model;
+
+  private $exception = null;
+  private $success = true;
+  private $data = null;
+
+  #first run  // 11/06/2021
+  # - add dynamic CRUD  *DONE
+  # - add dynamic validation *DONE
+  # - add dynamic API routes *DONE
+
+  #second run // 
+  # - add token validation
+  # - update database for token validation
+  # - route validation with token
+  # - add private variables for respond function *DONE
+  # - add fail responses 
+
+  #third run //  
+  # - update database for RBAC
+  # - add RBAC (Role Base access system) 
+
+
+  #EXTRA
+  # - add comments to every function *DONE
+
+  public function __construct(){
+          // check if request recieved the {id} variable
+          if(isset(request()->id)){
+            $this->id = request()->id; }
+          else {
+            $this->id = null; }
+          // check if request recieved the {model} variable
+          if(isset(request()->model)){
+            $this->name = request()->model; }
+          else {
+            $this->success = false;
+            $this->exception = "No name found";
+            return $this->response(); }
         $var = '\\App\\Models\\' . ucfirst($this->name);
           // check if model exists.
-        if(class_exists($var)){
-        $this->model = new $var();
-        }
-        else {
-    }
-  }
+          if(class_exists($var)){
+            $this->model = new $var(); }
+          else {
+              $this->success = false;
+              $this->exception = "model does not exist";
+              return $this->response(); } }
   
   public function getAll(){
-        try {
-
-          $data = $this->model::all();
-          $exception = null;
-          return $this->response(false,$data,$exception);
-        }
-        catch(Exception $exception){
-          $data = null;
-          return $this->response(true,$data,$exception);
-        }
-
-  }
-  public function getOne($id){
     try {
-      dd($id);
-        $data = $this->model::find($id);
-        $exception = null;
-        return $this->response(false,$data,$exception);
-      }
-      catch(Exception $exception){
-
-        $data = null;
-        return $this->response(true,$data,$exception);
-      }
-  }
-  public function save(request $request){
-      try {              
-
-            $vm = '\App\Http\Requests\\' . ucfirst($this->name) . 'Request'; 
-            $validator =  (new $vm())->rules();
-            $validate = Validator::make($request->all(), $validator);
-            if($validate->fails()){
-              report($validate);
-            }
-            else{
-              $this->model->fill($request->all())->save();
-            }
-        
-        $data = null;
-        $exception = null;
-        return $this->response(false,$data,$exception);
-      }
-      catch(Exception $exception){
-
-        $data = null;
-        return $this->response(true,$data,$exception);
-      }
+    // Gets all the records from the database and sets it into the $this->data variable.
+      $this->data = $this->model::all();
+      return $this->response();
     }
-  public function delete($id)
-  {
-      try {
-        dd($id);
-        $data = $this->model::find($id)->delete();
-        $exception = null;
-        return $this->response(false,$data,$exception);
-          }
-      catch(Exception $exception){
-
-        $data = null;
-        return $this->response(true,$data,$exception);
-      }
-  }
-  public function update(request $request, $id)
-  {
+    catch(Exception $exception){
+    // Set the exception into the $this->exception variable and sets $this->success to false for a failed API call.
+      $this->exception = $exception;
+      return $this->response();
+    } }
+  public function getOne(){
     try {
-
+      // Finds the correct Record and Set it into the $this->data variable. 
+        $this->data = $this->model::find($this->id);
+        return $this->response();
+      }
+      catch(Exception $exception){
+      // Set the exception into the $this->exception variable and sets $this->success to false for a failed API call.
+        $this->exception = $exception;
+        $this->success = false;
+        return $this->response();
+      } }
+  public function save(request $request){
+    try {              
+      // Finds the right Validator for the request and validates the request. 
+          $vm = '\App\Http\Requests\\' . ucfirst($this->name) . 'Request'; 
+          $validator =  (new $vm())->rules();
+          $validate = Validator::make($request->all(), $validator);
+          if($validate->fails()){
+      // Gives back the right response if the validate fails. 
+            $this->exception = "Validation failed";
+            return $this->response();
+          }
+          else{
+      // Creates the record in the database.
+            $this->model->fill($request->all())->save();
+          }
+      
+      return $this->response();
+    }
+    catch(Exception $exception){
+      // Set the exception into the $this->exception variable and sets $this->success to false for a failed API call.
+      $this->exception = $exception;
+      $this->success = false;
+      return $this->response();
+    }
+    }
+  public function delete(){
+    try {
+      // Deletes record from database.
+      $this->model::find($this->id)->delete();
+      return $this->response();
+        }
+    catch(Exception $exception){
+      // Set the exception into the $this->exception variable and sets $this->success to false for a failed API call.
+      $this->exception = $exception;
+      $this->success = false;
+      return $this->response(); 
+    } }
+  public function update(request $request, $id){
+    try {
+      // Finds the right Validator for the request and validates the request. 
       $vm = '\App\Http\Requests\\' . ucfirst($this->name) . 'Request'; 
       $validator =  (new $vm())->rules();
-      // dd($validator);
-
       $validate = Validator::make($request->all(), $validator);
       if($validate->fails()){
-        report($validate);
+      // Gives back the right response if the validate fails. 
+        $this->exception = "Validation failed";
+        return $this->response();
       }
       else{
-        // dd($request->all());
-        $this->model::find($id)->fill($request->all())->save();
+      // Updates the data in the database.
+        $this->model::find($this->id)->fill($request->all())->save();
       }
-        $data = null;
-        $exception = null;
-        return $this->response(false,$data,$exception);
-        }
+        return $this->response();
+      }
       catch(Exception $exception){
+      // Set the exception into the $this->exception variable and sets $this->success to false for a failed API call.
+        $this->exception = $exception;
+        $this->success = false;
+        return $this->response();
+    } }
+      
+  public function apiTokenUpdate(){
 
-        return $this->response(true,$data,$exception);
-    }
+    $token = Str::random(60);
+
+      $this->model->forceFill([
+        'api_token' => hash('sha256', $token),
+    ])->save();
+
+    return ['token' => $token];
+
   }
-      public function response(bool $error  , $data , $exception){
-
-          if($error == true){
-            
-              return response()->json([
-                
-                'error' => $error,
-                'data' => null,
-                'message' => "something went wrong",
-                'exception' => $exception,
-                      
-              ],500);
-              
-            }
-            else if($error == false) {
-              
-              return response()->json([
-                
-                'error' => $error,
-                'data' => $data,
-                'message' => "API call successful ",
-                'exception' => 'none',
-                
-              ],200);
-            }
-      }
+  
+  
+  
+  public function response(){
+      // Creates the jSON response that is given back with every request.
+    return response()->json([
+      'success'  => $this->success,
+      'data' => $this->data,
+      'message' => ($this->success ? "API call successful" : "API call failed, Something went wrong"),
+      'exception' => $this->exception,
+    ]);}
   }

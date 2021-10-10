@@ -19,7 +19,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 //main controller
-Route::get('/{model}','App\Http\Controllers\maincontroller@getAll');
+Route::get('/{model}','App\Http\Controllers\maincontroller@testreponse');
 Route::get('/{model}/{id}','App\Http\Controllers\maincontroller@getOne');
 Route::put('/{model}/{id}','App\Http\Controllers\maincontroller@update');
 Route::delete('/{model}/{id}','App\Http\Controllers\maincontroller@delete');
