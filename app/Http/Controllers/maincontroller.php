@@ -6,6 +6,7 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\Validator;
+use App\Models\User;
 
 class maincontroller extends Controller
 {
@@ -21,7 +22,7 @@ class maincontroller extends Controller
 
   #second run // 
   # - add token validation
-  # - update database for token validation
+  # - update database for token validation *DONE
   # - route validation with token
   # - add private variables for respond function *DONE
   # - add fail responses 
@@ -35,12 +36,31 @@ class maincontroller extends Controller
   # - add comments to every function *DONE
 
   public function __construct(){
-          // check if request recieved the {id} variable
+          //check if request recieved the {api_token} variable and validates it
+          if(isset(request()->api_token)){
+            $user = user::find()->where('api_token', request()->api_token);
+            if(isset($user)){
+              $this->user = $user;
+              dd($user);
+            }
+            else {
+              $this->success = false;
+              $this->exception = "API token not vailidated";
+              return $this->response(); 
+            }
+          }
+          else {      
+            $this->success = false;
+            $this->exception = "API token not recieved";
+            return $this->response(); 
+          }
+
+          // check if request recieved the {id} variable and sets the id variable
           if(isset(request()->id)){
             $this->id = request()->id; }
           else {
             $this->id = null; }
-          // check if request recieved the {model} variable
+          // check if request recieved the {model} variable and sets the id variable
           if(isset(request()->model)){
             $this->name = request()->model; }
           else {
@@ -140,20 +160,6 @@ class maincontroller extends Controller
         return $this->response();
     } }
       
-  public function apiTokenUpdate(){
-
-    $token = Str::random(60);
-
-      $this->model->forceFill([
-        'api_token' => hash('sha256', $token),
-    ])->save();
-
-    return ['token' => $token];
-
-  }
-  
-  
-  
   public function response(){
       // Creates the jSON response that is given back with every request.
     return response()->json([
