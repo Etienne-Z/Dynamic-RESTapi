@@ -37,11 +37,17 @@ class maincontroller extends Controller
 
   public function __construct(){
           //check if request recieved the {api_token} variable and validates it
-          if(isset(request()->api_token)){
-            $user = user::find()->where('api_token', request()->api_token);
+          // dd(request()->header("api_token"));
+          if(request()->hasHeader('api_token')){
+
+            $token = request()->header('api_token');
+            dd($token);
+            $user = user::find($token);
+          
+          dd($user);
+  
             if(isset($user)){
               $this->user = $user;
-              dd($user);
             }
             else {
               $this->success = false;
@@ -50,6 +56,7 @@ class maincontroller extends Controller
             }
           }
           else {      
+          
             $this->success = false;
             $this->exception = "API token not recieved";
             return $this->response(); 
