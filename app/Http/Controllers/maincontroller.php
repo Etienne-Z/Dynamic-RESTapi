@@ -6,7 +6,8 @@ use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\Validator;
-use App\Models\User;
+use App\Models\user;
+use Illuminate\Support\Facades\DB;
 
 class maincontroller extends Controller
 {
@@ -23,31 +24,39 @@ class maincontroller extends Controller
   #second run // 
   # - add token validation
   # - update database for token validation *DONE
-  # - route validation with token
   # - add private variables for respond function *DONE
-  # - add fail responses 
+  # - add fail responses *DONE
 
   #third run //  
   # - update database for RBAC
   # - add RBAC (Role Base access system) 
 
 
+
   #EXTRA
   # - add comments to every function *DONE
+  # - route validation with token
+
 
   public function __construct(){
           //check if request recieved the {api_token} variable and validates it
           // dd(request()->header("api_token"));
           if(request()->hasHeader('api_token')){
 
-            $token = request()->header('api_token');
-            dd($token);
-            $user = user::find($token);
-          
-          dd($user);
+         //   $token = request()->header('api_token');
+          //  print_r($token);
+
+            $user = User::where('api_token', request()->header('api_token') )->get()->toArray();
+            // dd($user);
+            // $user  = 
+            // DB::select('select * from users where api_token = ?', [$token]);
+            
+
+              // dd($user);
   
             if(isset($user)){
               $this->user = $user;
+              print_r($this->user);
             }
             else {
               $this->success = false;
@@ -175,4 +184,4 @@ class maincontroller extends Controller
       'message' => ($this->success ? "API call successful" : "API call failed, Something went wrong"),
       'exception' => $this->exception,
     ]);}
-  }
+  } 
