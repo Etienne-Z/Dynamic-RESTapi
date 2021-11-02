@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\Validator;
-use App\Models\user;
-use Illuminate\Support\Facades\DB;
+use App\Models\User;
 
 class maincontroller extends Controller
 {
@@ -15,6 +13,7 @@ class maincontroller extends Controller
   private $exception = null;
   private $success = true;
   private $data = null;
+  private $message = null;
 
   #first run  // 11/06/2021
   # - add dynamic CRUD  *DONE
@@ -22,13 +21,13 @@ class maincontroller extends Controller
   # - add dynamic API routes *DONE
 
   #second run // 
-  # - add token validation
+  # - add token validation *DONE -- NEED TO CHECK WITH TEACHER
   # - update database for token validation *DONE
   # - add private variables for respond function *DONE
   # - add fail responses *DONE
 
   #third run //  
-  # - update database for RBAC
+  # - update database for RBAC *IN PROGRESS 
   # - add RBAC (Role Base access system) 
 
 
@@ -42,32 +41,23 @@ class maincontroller extends Controller
           //check if request recieved the {api_token} variable and validates it
           // dd(request()->header("api_token"));
           if(request()->hasHeader('api_token')){
-
-         //   $token = request()->header('api_token');
-          //  print_r($token);
-
-            $user = User::where('api_token', request()->header('api_token') )->get()->toArray();
-            // dd($user);
-            // $user  = 
-            // DB::select('select * from users where api_token = ?', [$token]);
-            
-
-              // dd($user);
-  
-            if(isset($user)){
+          
+            $user = User::where('api_token', request()->header('api_token'))->get()->toArray();
+          
+            if($user != null){                
               $this->user = $user;
-              print_r($this->user);
-            }
+             }
+
             else {
               $this->success = false;
-              $this->exception = "API token not vailidated";
+              $this->message = "API token not vailidated";
               return $this->response(); 
             }
           }
           else {      
           
             $this->success = false;
-            $this->exception = "API token not recieved";
+            $this->message = "API token not recieved";
             return $this->response(); 
           }
 
@@ -81,7 +71,7 @@ class maincontroller extends Controller
             $this->name = request()->model; }
           else {
             $this->success = false;
-            $this->exception = "No name found";
+            $this->message = "No name found";
             return $this->response(); }
         $var = '\\App\\Models\\' . ucfirst($this->name);
           // check if model exists.
@@ -89,7 +79,7 @@ class maincontroller extends Controller
             $this->model = new $var(); }
           else {
               $this->success = false;
-              $this->exception = "model does not exist";
+              $this->message = "model does not exist";
               return $this->response(); } }
   
   public function getAll(){
@@ -123,7 +113,7 @@ class maincontroller extends Controller
           $validate = Validator::make($request->all(), $validator);
           if($validate->fails()){
       // Gives back the right response if the validate fails. 
-            $this->exception = "Validation failed";
+            $this->message = "Validation failed";
             return $this->response();
           }
           else{
@@ -160,7 +150,7 @@ class maincontroller extends Controller
       $validate = Validator::make($request->all(), $validator);
       if($validate->fails()){
       // Gives back the right response if the validate fails. 
-        $this->exception = "Validation failed";
+        $this->message = "Validation failed";
         return $this->response();
       }
       else{
@@ -177,11 +167,12 @@ class maincontroller extends Controller
     } }
       
   public function response(){
-      // Creates the jSON response that is given back with every request.
+    // Creates the jSON response that is given back with every request.
     return response()->json([
       'success'  => $this->success,
-      'data' => $this->data,
+      'data' => ($this->success ? $this->data : null),
       'message' => ($this->success ? "API call successful" : "API call failed, Something went wrong"),
       'exception' => $this->exception,
-    ]);}
+      'error_message' => $this->message,
+    ]); }
   } 
