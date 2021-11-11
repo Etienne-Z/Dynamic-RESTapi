@@ -27,14 +27,13 @@ class maincontroller extends Controller
   # - add fail responses *DONE
 
   #third run //  
-  # - update database for RBAC *IN PROGRESS 
-  # - add RBAC (Role Base access system) 
+  # - update database for RBAC *DONE
+  # - add RBAC (Role Base access system) * IN PROGRESS
 
 
 
   #EXTRA
   # - add comments to every function *DONE
-  # - route validation with token
 
 
   public function __construct(){
@@ -50,7 +49,7 @@ class maincontroller extends Controller
 
             else {
               $this->success = false;
-              $this->message = "API token not vailidated";
+              $this->message = "API token not validated";
               return $this->response(); 
             }
           }
