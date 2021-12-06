@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class maincontroller extends Controller
 {
@@ -14,6 +15,7 @@ class maincontroller extends Controller
   private $success = true;
   private $data = null;
   private $message = null;
+  private $token = null;
 
   #first run  // 11/06/2021
   # - add dynamic CRUD  *DONE
@@ -27,6 +29,11 @@ class maincontroller extends Controller
   # - add fail responses *DONE
 
   #third run //  
+  # - hash api_token
+  # - give token back to created user
+  # - add refresh token function 
+  # - search package 
+
   # - update database for RBAC *DONE
   # - add RBAC (Role Base access system) * IN PROGRESS
 
@@ -36,29 +43,45 @@ class maincontroller extends Controller
   # - add comments to every function *DONE
 
 
-  public function __construct(){
+  public function __construct(request $request){
           //check if request recieved the {api_token} variable and validates it
           // dd(request()->header("api_token"));
-          if(request()->hasHeader('api_token')){
+          if(!request()->hasHeader('api_token')){
           
-            $user = User::where('api_token', request()->header('api_token'))->get()->toArray();
-          
-            if($user != null){                
-              $this->user = $user;
-             }
+              if(request()->has('email') && request()->has('password')){
+                $credentials = $request->only('email', 'password');
+                
+                // checks if a user exists in database and logs in. 
 
-            else {
-              $this->success = false;
-              $this->message = "API token not validated";
-              return $this->response(); 
-            }
+                if(Auth::attempt($credentials)){
+                  Auth::login($credentials, $remember = true);
+                
+                }
+                
+                else{
+                  $this->success = false;
+                  $this->message = "Login failed";
+                  return $this->response(); 
+                }
+  
+              }
+              else {
+                $this->success = false;
+                $this->message = "No credentials where found";
+                return $this->response(); 
+              }
+
+
+        
           }
           else {      
           
-            $this->success = false;
-            $this->message = "API token not recieved";
-            return $this->response(); 
+
+
           }
+
+          // ----------------------------------------------------------- \\
+
 
           // check if request recieved the {id} variable and sets the id variable
           if(isset(request()->id)){
@@ -82,6 +105,8 @@ class maincontroller extends Controller
               return $this->response(); } }
   
   public function getAll(){
+
+    // model - permission
     try {
     // Gets all the records from the database and sets it into the $this->data variable.
       $this->data = $this->model::all();
@@ -172,6 +197,7 @@ class maincontroller extends Controller
       'data' => ($this->success ? $this->data : null),
       'message' => ($this->success ? "API call successful" : "API call failed, Something went wrong"),
       'exception' => $this->exception,
+      'token' => $this->token,
       'error_message' => $this->message,
     ]); }
   } 
