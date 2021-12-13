@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\roles_permissions;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
+
+use function GuzzleHttp\Promise\exception_for;
 
 class maincontroller extends Controller
 {
@@ -15,18 +20,8 @@ class maincontroller extends Controller
   private $success = true;
   private $data = null;
   private $message = null;
-  private $token = null;
-
-  #first run  // 11/06/2021
-  # - add dynamic CRUD  *DONE
-  # - add dynamic validation *DONE
-  # - add dynamic API routes *DONE
-
-  #second run // 
-  # - add token validation *DONE -- NEED TO CHECK WITH TEACHER
-  # - update database for token validation *DONE
-  # - add private variables for respond function *DONE
-  # - add fail responses *DONE
+  private $global_token = null;
+  private $user_role = null;
 
   #third run //  
   # - hash api_token
@@ -46,45 +41,62 @@ class maincontroller extends Controller
   public function __construct(request $request){
           //check if request recieved the {api_token} variable and validates it
           // dd(request()->header("api_token"));
-          if(!request()->hasHeader('api_token')){
-          
-              if(request()->has('email') && request()->has('password')){
-                $credentials = $request->only('email', 'password');
-                
-                // checks if a user exists in database and logs in. 
 
+          if(!request()->hasHeader('api_token')){
+              if(request()->has(['email', 'password'])){
+                $credentials = $request->only('email', 'password');
+              
                 if(Auth::attempt($credentials)){
-                  Auth::login($credentials, $remember = true);
-                
-                }
-                
+                      try {
+                        $new_token = Hash::make(Str::random(60));   
+                        user::find($credentials)->update([
+                              'api_token' => $new_token
+                        ]);
+                        $this->global_token = $new_token;
+                      }
+                      catch(exception $exception){
+                        $this->exception = $exception;
+                        $this->success = false;
+                        $this->message = "token generation failed";
+                        return $this->response();
+                      }
+
+                    
+                    }
                 else{
                   $this->success = false;
-                  $this->message = "Login failed";
+                  $this->message = "No user found";
+
                   return $this->response(); 
                 }
-  
               }
               else {
                 $this->success = false;
                 $this->message = "No credentials where found";
                 return $this->response(); 
               }
-
-
-        
           }
-          else {      
-          
-
-
+          else {
+            $this->global_token = request()->header('api_token');
           }
 
-          // ----------------------------------------------------------- \\
-
+          try { 
+          // dd($this->global_token);
+          $this->user = User::all();
+          // dd($user);
+          // $roleperms =  roles_permissions::find($role_id);
+           
+           
+          }
+          catch(exception $exception){
+            $this->exception = $exception;
+            $this->success = false;
+            $this->message = "no token found";
+            return $this->response();
+          }
 
           // check if request recieved the {id} variable and sets the id variable
-          if(is  set(request()->id)){
+          if(isset(request()->id)){
             $this->id = request()->id; }
           else {
             $this->id = null; }
@@ -197,7 +209,8 @@ class maincontroller extends Controller
       'data' => ($this->success ? $this->data : null),
       'message' => ($this->success ? "API call successful" : "API call failed, Something went wrong"),
       'exception' => $this->exception,
-      'token' => $this->token,
+      'token' => $this->global_token,
       'error_message' => $this->message,
+      'user' => $this->user
     ]); }
   } 

@@ -17,6 +17,7 @@ use App\Http\Controllers\maincontroller;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+// Route::get('/testuser','App\Http\Controllers\testcontroller@testUser');
 
 //main controller
 Route::get('/{model}','App\Http\Controllers\maincontroller@getAll');
