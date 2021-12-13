@@ -62,7 +62,7 @@ class maincontroller extends Controller
           }
 
           // check if request recieved the {id} variable and sets the id variable
-          if(isset(request()->id)){
+          if(is  set(request()->id)){
             $this->id = request()->id; }
           else {
             $this->id = null; }
