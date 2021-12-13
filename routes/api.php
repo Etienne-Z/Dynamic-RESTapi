@@ -24,3 +24,7 @@ Route::get('/{model}/{id}','App\Http\Controllers\maincontroller@getOne');
 Route::put('/{model}/{id}','App\Http\Controllers\maincontroller@update');
 Route::delete('/{model}/{id}','App\Http\Controllers\maincontroller@delete');
 Route::post('/{model}','App\Http\Controllers\maincontroller@save');
+
+
+
+// )->middleware('auth');
