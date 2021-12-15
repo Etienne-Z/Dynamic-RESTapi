@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\roles_permissions;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\Validator;
+use App\Models\roles_permissions;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+
 
 use function GuzzleHttp\Promise\exception_for;
 
@@ -23,24 +25,8 @@ class maincontroller extends Controller
   private $global_token = null;
   private $user_role = null;
 
-  #third run //  
-  # - hash api_token
-  # - give token back to created user
-  # - add refresh token function 
-  # - search package 
-
-  # - update database for RBAC *DONE
-  # - add RBAC (Role Base access system) * IN PROGRESS
-
-
-
-  #EXTRA
-  # - add comments to every function *DONE
-
-
   public function __construct(request $request){
           //check if request recieved the {api_token} variable and validates it
-          // dd(request()->header("api_token"));
 
           if(!request()->hasHeader('api_token')){
               if(request()->has(['email', 'password'])){
@@ -74,19 +60,34 @@ class maincontroller extends Controller
                 $this->success = false;
                 $this->message = "No credentials where found";
                 return $this->response(); 
-              }
-          }
+              }}
           else {
-            $this->global_token = request()->header('api_token');
+            // $bool = request()->header("api_token");
+            // $bol=  User::where('api_token', $bool)->get();
+            // dd($bol);
+            // if($bool != null){
+            //   $this->global_token = request()->header('api_token');
+            // }
           }
+      
+          // $permission_ids = roles_permissions::where('role_id', 1);
+          // dd($permission_ids);
+
+          // User::create(['bla' => "/"]);
+          // $bla = $user->attributes->bla = "whfsdafghfd";
+          // $bla =  (object) array_merge( (array) $user, ['bla' => "wertyui"]);
+            // dd($bla);
+
+
 
           try { 
-          // dd($this->global_token);
-          $this->user = User::all();
-          // dd($user);
-          // $roleperms =  roles_permissions::find($role_id);
-           
-           
+
+            $user = json_encode(User::all());
+            dd($user);
+
+
+           // gets user
+           // gets permissions 
           }
           catch(exception $exception){
             $this->exception = $exception;
