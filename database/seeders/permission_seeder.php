@@ -15,28 +15,34 @@ class permission_seeder extends Seeder
     public function run()
     {
         DB::table('permissions')->insert([
-            'permission_name' => 'create_domain',
+            'permission_name' => 'Domain_save',
         ]);
         DB::table('permissions')->insert([
-            'permission_name' => 'delete_domain',
+            'permission_name' => 'Domain_delete',
         ]);
         DB::table('permissions')->insert([
-            'permission_name' => 'getAll_domain',
+            'permission_name' => 'Domain_getall',
         ]);
         DB::table('permissions')->insert([
-            'permission_name' => 'getOne_domain',
+            'permission_name' => 'Domain_getone',
         ]);
         DB::table('permissions')->insert([
-            'permission_name' => 'create_user',
+            'permission_name' => 'Domain_update',
         ]);
         DB::table('permissions')->insert([
-            'permission_name' => 'delete_user',
+            'permission_name' => 'User_create',
         ]);
         DB::table('permissions')->insert([
-            'permission_name' => 'getAll_user',
+            'permission_name' => 'User_delete',
         ]);
         DB::table('permissions')->insert([
-            'permission_name' => 'getOne_user',
+            'permission_name' => 'User_getall',
+        ]);
+        DB::table('permissions')->insert([
+            'permission_name' => 'User_getone',
+        ]);
+        DB::table('permissions')->insert([
+            'permission_name' => 'User_update',
         ]);
     }
 }

@@ -15,15 +15,19 @@ class baseController extends Controller
     private $gtoken = null;
     private $user = null;
 
+    private $permissions = 
+    ["Domain_save","Domain_delete","Domain_getall","Domain_getone","Domain_update"];
 
     
     public function checkperm($perm){
         $count = 0;
-        foreach($this->user->permissions as $i){
+        // dd($this->permissions);
+        foreach($this->permissions as $i){
             if($i == $perm){
                 return true;
+                print_r("true has been returned");
             }
-            if($count > count($this->user->permissions)){
+            if($count > count($this->permissions)){
                 return false;
             }
             $count++;
@@ -39,6 +43,6 @@ class baseController extends Controller
           'exception' => $this->exception,
           'token' => $this->gtoken,
           'error_message' => $this->message,
-          'user' => $this->user,
+        //   'user' => $this->user,
         ]); }
 }

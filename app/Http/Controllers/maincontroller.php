@@ -13,12 +13,7 @@ use Illuminate\Support\Facades\Hash;
 
 class maincontroller extends baseController
 {
-
-
-
-
   public function __construct(request $request){
-
           //check if request recieved the {api_token} variable and validates it
           if(!request()->hasHeader('api_token')){
             if($request->has('email') && $request->has('password')){
@@ -51,7 +46,10 @@ class maincontroller extends baseController
           }          
 
           // ----------------------------------------------------------- \\
+          // Gets user -> gets role_id -> gets list of permissions -> sets list into the $this-user-permissions field
+        
 
+          
           // check if request recieved the {id} variable and sets the id variable
           if(isset(request()->id)){
             $this->id = request()->id; }
@@ -75,7 +73,6 @@ class maincontroller extends baseController
           }       
   }
 
-        // Gets user -> gets role_id -> gets list of permissions -> sets list into the $this-user-permissions field
 
   public function getAll(){
     //makes permission:
@@ -186,7 +183,7 @@ class maincontroller extends baseController
 
   public function update(request $request, $id){
     //makes permission:
-    $perm = ucfirst(request()->model) . '_getone';
+    $perm = ucfirst(request()->model) . '_update';
     // If the check function returns TRUE then it can run the action.
     if($this->checkperm($perm)){
       try {
